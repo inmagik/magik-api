@@ -1,9 +1,12 @@
 import { ajax, AjaxRequest, AjaxResponse } from 'rxjs/ajax'
+import { map } from 'rxjs/operators'
 import { parseUrl, stringifyUrl, ParsedQuery, stringify } from 'query-string'
 
 type ApiUrlRequest = Omit<AjaxRequest, 'url' | 'method' | 'body'>
 
 type AuthHeadersInjector = (auth: any, requestConfig: ApiUrlRequest) => Object
+
+type ResponseMapper = (response: AjaxResponse) => any
 
 interface BaseApiOptions {
   baseUrl?: string
@@ -11,6 +14,7 @@ interface BaseApiOptions {
   injectAuthHeaders?: AuthHeadersInjector
   requestConfig?: ApiUrlRequest
   queryParams?: ParsedQuery
+  mapResponse?: ResponseMapper
 }
 
 function injectAuthHeaders(
@@ -51,6 +55,14 @@ function makeUrl(
   return stringifyUrl({ url: cleanUrl, query })
 }
 
+function guessContentType(body: any): Object {
+  const fd = typeof window === 'object' ? window.FormData : null
+  if (fd && body instanceof fd) {
+    return {}
+  }
+  return { 'Content-Type': 'application/json' }
+}
+
 function httpGET(
   url: string,
   options: BaseApiOptions,
@@ -68,20 +80,19 @@ function httpGET(
       options,
       auth
     )
-  )
+  ).pipe(map(options.mapResponse ?? ((r) => r.response)))
 }
 
-function httpPOST(
-  url: string,
-  options: BaseApiOptions,
-  body: any,
-  auth?: any
-) {
+function httpPOST(url: string, options: BaseApiOptions, body: any, auth?: any) {
   const fullUrl = makeUrl(url, options)
   return ajax(
     injectAuthHeaders(
       {
         ...options.requestConfig,
+        headers: {
+          ...guessContentType(body),
+          ...options.requestConfig?.headers,
+        },
         url: fullUrl,
         method: 'POST',
         body,
@@ -89,20 +100,19 @@ function httpPOST(
       options,
       auth
     )
-  )
+  ).pipe(map(options.mapResponse ?? ((r) => r.response)))
 }
 
-function httpPUT(
-  url: string,
-  options: BaseApiOptions,
-  body: any,
-  auth?: any
-) {
+function httpPUT(url: string, options: BaseApiOptions, body: any, auth?: any) {
   const fullUrl = makeUrl(url, options)
   return ajax(
     injectAuthHeaders(
       {
         ...options.requestConfig,
+        headers: {
+          ...guessContentType(body),
+          ...options.requestConfig?.headers,
+        },
         url: fullUrl,
         method: 'PUT',
         body,
@@ -110,7 +120,7 @@ function httpPUT(
       options,
       auth
     )
-  )
+  ).pipe(map(options.mapResponse ?? ((r) => r.response)))
 }
 
 function httpPATCH(
@@ -124,6 +134,10 @@ function httpPATCH(
     injectAuthHeaders(
       {
         ...options.requestConfig,
+        headers: {
+          ...guessContentType(body),
+          ...options.requestConfig?.headers,
+        },
         url: fullUrl,
         method: 'PATCH',
         body,
@@ -131,11 +145,11 @@ function httpPATCH(
       options,
       auth
     )
-  )
+  ).pipe(map(options.mapResponse ?? ((r) => r.response)))
 }
 
 abstract class BaseApiBuilder<T> {
-  protected abstract create(options: BaseApiOptions): T
+  protected abstract clone(options: BaseApiOptions): T
 
   protected options: BaseApiOptions
 
@@ -143,30 +157,27 @@ abstract class BaseApiBuilder<T> {
     this.options = options
   }
 
-  baseUrl = (baseUrl: string) => {
-    return this.create({ ...this.options, baseUrl })
-  }
+  baseUrl = (baseUrl: string) => this.clone({ ...this.options, baseUrl })
 
-  auth = (auth: any) => {
-    return this.create({ ...this.options, auth })
-  }
+  auth = (auth: any) => this.clone({ ...this.options, auth })
 
-  authHeaders = (injectAuthHeaders: AuthHeadersInjector) => {
-    return this.create({ ...this.options, injectAuthHeaders })
-  }
+  authHeaders = (injectAuthHeaders: AuthHeadersInjector) =>
+    this.clone({ ...this.options, injectAuthHeaders })
 
-  request = (requestConfig: ApiUrlRequest) => {
-    return this.create({
+  mapResponse = (mapResponse: ResponseMapper) =>
+    this.clone({ ...this.options, mapResponse })
+
+  request = (requestConfig: ApiUrlRequest) =>
+    this.clone({
       ...this.options,
       requestConfig: {
         ...this.options.requestConfig,
         ...requestConfig,
       },
     })
-  }
 
-  headers = (headers: Object) => {
-    return this.create({
+  headers = (headers: Object) =>
+    this.clone({
       ...this.options,
       requestConfig: {
         ...this.options.requestConfig,
@@ -176,41 +187,19 @@ abstract class BaseApiBuilder<T> {
         },
       },
     })
-  }
 
-  query = (queryParams: ParsedQuery) => {
-    return this.create({
+  query = (queryParams: ParsedQuery) =>
+    this.clone({
       ...this.options,
       queryParams: {
         ...this.options.queryParams,
         ...queryParams,
       },
     })
-  }
 }
 
 interface UrlApiOptions extends BaseApiOptions {
   readonly url: string
-}
-
-class UrlApiBuilder extends BaseApiBuilder<UrlApiBuilder> {
-  protected options: UrlApiOptions
-
-  constructor(options: UrlApiOptions) {
-    super(options)
-  }
-
-  curryAuth = () => {
-    return new ApiCurriedAuthUrlBuilder(this.options)
-  }
-
-  get = (queryParams: ParsedQuery) => {
-    return httpGET(this.options.url, this.options, queryParams)
-  }
-
-  protected create = (options: UrlApiOptions) => {
-    return new UrlApiBuilder(options)
-  }
 }
 
 class ApiCurriedAuthUrlBuilder extends BaseApiBuilder<
@@ -222,32 +211,79 @@ class ApiCurriedAuthUrlBuilder extends BaseApiBuilder<
     super(options)
   }
 
-  get = (auth: any) => {
-    return (queryParams: ParsedQuery) =>
-      httpGET(this.options.url, this.options, queryParams, auth)
+  get = (auth: any) => (query?: ParsedQuery) =>
+    httpGET(this.options.url, this.options, query, auth)
+
+  post = (auth: any) => (body: any) =>
+    httpPOST(this.options.url, this.options, body, auth)
+
+  put = (auth: any) => (body: any) =>
+    httpPUT(this.options.url, this.options, body, auth)
+
+  path = (auth: any) => (body: any) =>
+    httpPATCH(this.options.url, this.options, body, auth)
+
+  protected clone = (options: UrlApiOptions) =>
+    new ApiCurriedAuthUrlBuilder(options)
+}
+
+class UrlApiBuilder extends BaseApiBuilder<UrlApiBuilder> {
+  protected options: UrlApiOptions
+
+  constructor(options: UrlApiOptions) {
+    super(options)
   }
 
-  protected create = (options: UrlApiOptions) => {
-    return new ApiCurriedAuthUrlBuilder(options)
+  curryAuth = () => new ApiCurriedAuthUrlBuilder(this.options)
+
+  get = (query?: ParsedQuery) => httpGET(this.options.url, this.options, query)
+
+  post = (body?: any) => httpPOST(this.options.url, this.options, body)
+
+  put = (body?: any) => httpPUT(this.options.url, this.options, body)
+
+  path = (body?: any) => httpPATCH(this.options.url, this.options, body)
+
+  protected clone = (options: UrlApiOptions) => new UrlApiBuilder(options)
+}
+
+class ResourceApiBuilder extends BaseApiBuilder<ResourceApiBuilder> {
+  protected options: UrlApiOptions
+
+  constructor(options: UrlApiOptions) {
+    super(options)
   }
+
+  list = (query?: ParsedQuery) => httpGET(this.options.url, this.options, query)
+
+  detail = (pk: string | number, query?: ParsedQuery) =>
+    httpGET(this.options.url + `/${pk}`, this.options, query)
+
+  create = (body?: any) => httpPOST(this.options.url, this.options, body)
+
+  update = (pk: string| number, body?: any) =>
+    httpPUT(this.options.url + `/${pk}`, this.options, body)
+
+  makeDetailPUT = (actionUrl: string) => (pk: string| number, body?: any) =>
+    httpPUT(this.options.url + `/${pk}/${actionUrl}`, this.options, body)
+
+  protected clone = (options: UrlApiOptions) => new ResourceApiBuilder(options)
 }
 
 class ApiBuilder extends BaseApiBuilder<ApiBuilder> {
-  url = (url: string) => {
-    return new UrlApiBuilder({ ...this.options, url })
-  }
+  url = (url: string) => new UrlApiBuilder({ ...this.options, url })
 
-  get = (url: string, queryParams?: ParsedQuery) => {
-    return httpGET(url, this.options, queryParams)
-  }
+  resource = (url: string) => new ResourceApiBuilder({ ...this.options, url })
 
-  post = (url: string, queryParams?: ParsedQuery) => {
-    return httpGET(url, this.options, queryParams)
-  }
+  get = (url: string, query?: ParsedQuery) => httpGET(url, this.options, query)
 
-  protected create = (options: BaseApiOptions) => {
-    return new ApiBuilder(options)
-  }
+  post = (url: string, body?: any) => httpPOST(url, this.options, body)
+
+  put = (url: string, body?: any) => httpPUT(url, this.options, body)
+
+  patch = (url: string, body?: any) => httpPATCH(url, this.options, body)
+
+  protected clone = (options: BaseApiOptions) => new ApiBuilder(options)
 }
 
 export default function magikApi() {
