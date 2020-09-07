@@ -1,0 +1,32 @@
+{
+  "name": "magik-api",
+  "version": "0.1.0",
+  "description": "Fluent API client based on rxjs",
+  "author": "Giovanni Fumagalli <giovanni.fumagalli@inmagik.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.cjs.js",
+  "files": [
+    "README.MD",
+    "LICENSE",
+    "lib"
+  ],
+  "scripts": {
+    "dev": "webpack-dev-server",
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^5.0.2",
+    "rollup": "^2.26.10",
+    "ts-loader": "^8.0.3",
+    "typescript": "^4.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "query-string": "^6.13.1",
+    "rxjs": "^6.6.3",
+    "tslib": "^2.0.1"
+  }
+}
