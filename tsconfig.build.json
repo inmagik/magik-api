@@ -1,18 +1,15 @@
 {
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.test.ts"],
   "compilerOptions": {
-    "outDir": "./lib",
     "noImplicitAny": true,
     "module": "es6",
     "target": "es5",
     "moduleResolution": "node",
     "jsx": "react",
-    "baseUrl": "./",
     "lib": [
       "dom",
       "es2015"
     ],
-    "paths": {
-      "magik-api": ["src/index"]
-    }
   }
 }

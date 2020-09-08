@@ -24,5 +24,9 @@ export default ['esm', 'cjs'].map((format) => ({
     exports: 'named',
   },
   external: makeExternalPredicate(vendors),
-  plugins: [typescript()],
+  plugins: [
+    typescript({
+      tsconfig: 'tsconfig.build.json',
+    }),
+  ],
 }))

@@ -1,5 +1,4 @@
 import magikApi from 'magik-api'
-import { ajaxPut } from 'rxjs/internal/observable/dom/AjaxObservable'
 
 const api = magikApi()
   // Configure how inject headers when an api call is authenticated ..
@@ -67,16 +66,17 @@ api1
 
 // Will send header X-Hello: Hello
 api1.baseUrl('/Ooo')
-.url('/magik')
-.headers({
-  'X-aa': 23,
-})
-.resource('/2x')
-// .curryAuth()
-.auth('aaaax0000')
-.create({
-  hello: 'Giova'
-})
+// api1.
+// .url('/magik')
+// .headers({
+//   'X-aa': 23,
+// })
+// .resource('/2x')
+// // .curryAuth()
+// .auth('aaaax0000')
+// .create({
+//   hello: 'Giova'
+// })
 
 // Curry url
 // const fetchTodos = api.url('/todos').get
@@ -90,7 +90,7 @@ api1.baseUrl('/Ooo')
 // .create('~')({
 //   name: 'fucker'
 // })
-.toPromise().then(console.log)
+// .toPromise().then(console.log)
 // todosApi.delete('/fucker/23', { gang: '23' })
 // todosApi
 // .auth(23)

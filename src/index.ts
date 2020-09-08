@@ -1,3 +1,6 @@
+// NOTE: This useless import fixed types problems during build
+// TS2339: Property 'observable' does not exist on type 'SymbolConstructor'.
+import { Observable } from 'rxjs'
 import { ajax, AjaxRequest, AjaxResponse } from 'rxjs/ajax'
 import { map } from 'rxjs/operators'
 import { parseUrl, stringifyUrl, ParsedQuery, stringify } from 'query-string'
