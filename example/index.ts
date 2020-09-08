@@ -66,15 +66,31 @@ api1
   .get('/')
 
 // Will send header X-Hello: Hello
-api1.get('/x')
+api1.baseUrl('/Ooo')
+.url('/magik')
+.headers({
+  'X-aa': 23,
+})
+.resource('/2x')
+// .curryAuth()
+.auth('aaaax0000')
+.create({
+  hello: 'Giova'
+})
 
 // Curry url
-const fetchTodos = api.url('/todos').get
-fetchTodos()
-// work also for put, post, patch and delete
+// const fetchTodos = api.url('/todos').get
+// fetchTodos()
+// // work also for put, post, patch and delete
 
-// Curry a resource!
-const todosApi = api.resource('/todos')
+// // Curry a resource!
+// const todosApi = api.resource('/todos')
+// .curryAuth()
+// // .
+// .create('~')({
+//   name: 'fucker'
+// })
+.toPromise().then(console.log)
 // todosApi.delete('/fucker/23', { gang: '23' })
 // todosApi
 // .auth(23)
@@ -90,7 +106,6 @@ const todosApi = api.resource('/todos')
 // api.url('/ffffff').curryAuth().get('xxxx')({ aaa: 'xx' })
 // .
 // curryAuht().create
-// .toPromise().then(console.log)
 // todosApi.headers({}).
 // todosApi.list()
 // todosApi.detail(23)
