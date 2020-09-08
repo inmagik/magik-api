@@ -100,4 +100,32 @@ describe('Magik API', () => {
       method: 'DELETE',
     })
   })
+
+  it('should be able to set a base url for requests', () => {
+    const api = magikApi().baseUrl('/v1')
+
+    api.get('/bau')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/bau',
+      method: 'GET',
+    })
+
+    api.put('/bau')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/bau',
+      method: 'PUT',
+    })
+
+    api.baseUrl('/awesome').delete('/bau')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/awesome/bau',
+      method: 'DELETE',
+    })
+
+    api.post('/d')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/d',
+      method: 'POST',
+    })
+  })
 })
