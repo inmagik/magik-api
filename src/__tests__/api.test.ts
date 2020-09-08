@@ -128,4 +128,81 @@ describe('Magik API', () => {
       method: 'POST',
     })
   })
+
+  it('should handle resources', () => {
+    const api = magikApi().baseUrl('/v1')
+
+    const gangApi = api.resource('/gangs')
+    gangApi.list()
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs',
+      method: 'GET',
+    })
+
+    gangApi.list({ name: 'Gio', nick: 'Va' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs?name=Gio&nick=Va',
+      method: 'GET',
+    })
+
+    gangApi.detail(23)
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/23',
+      method: 'GET',
+    })
+
+    gangApi.create({ name: 'KDS' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'KDS',
+      },
+    })
+
+    gangApi.update(23, { name: 'Raverz' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/23',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'Raverz',
+      },
+    })
+
+    gangApi.remove(23)
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/23',
+      method: 'DELETE',
+    })
+  })
+
+  it('should handle auth', () => {
+    const api = magikApi()
+
+    api.auth('Jonny').authHeaders(t => ({
+      'Authorization': `Tokenz ${t}`
+    })).get('/zecrets')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/zecrets',
+      method: 'GET',
+      headers: {
+        Authorization: 'Tokenz Jonny'
+      }
+    })
+
+    api.auth('Jonny').get('/ola')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/ola',
+      method: 'GET',
+      headers: {
+        Authorization: 'Jonny'
+      }
+    })
+  })
 })

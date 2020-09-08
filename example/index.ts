@@ -5,7 +5,7 @@ const api = magikApi()
   .authHeaders((token: string) => ({
     Authorization: `Token ${token}`,
   }))
-
+// magikApi().options
 // Make a simple GET
 api.get('/todos')
 // api.get({ gang: '23' })

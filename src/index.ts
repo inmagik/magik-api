@@ -27,10 +27,13 @@ function injectAuthHeaders(
   auth?: any
 ): AjaxRequest {
   const flyAuth = auth ?? options.auth
-  const authHeaders =
-    options.injectAuthHeaders && flyAuth
-      ? options.injectAuthHeaders(flyAuth, fullRequestConfig)
-      : null
+  let authHeaders
+  if (flyAuth) {
+    authHeaders =
+      typeof options.injectAuthHeaders === 'function'
+        ? options.injectAuthHeaders(flyAuth, fullRequestConfig)
+        : { Authorization: flyAuth }
+  }
 
   if (authHeaders) {
     return {
@@ -100,7 +103,11 @@ function sendHttp({
     }
   }
   return ajax(injectAuthHeaders(flyRequestConfig, options, auth)).pipe(
-    map(options.mapResponse ?? ((r) => r.response))
+    map(
+      typeof options.mapResponse === 'function'
+        ? options.mapResponse
+        : (r) => r.response
+    )
   )
 }
 
@@ -167,10 +174,15 @@ function httpDELETE(
 abstract class BaseApiBuilder<T> {
   protected abstract clone(options: ApiOptions): T
 
-  protected options: ApiOptions
+  protected readonly options: ApiOptions
 
   constructor(options: ApiOptions) {
-    this.options = options
+    Object.defineProperty(this, 'options', {
+      value: options,
+      configurable: false,
+      writable: false,
+      enumerable: false,
+    })
   }
 
   baseUrl = (baseUrl: string) => this.clone({ ...this.options, baseUrl })
@@ -312,23 +324,23 @@ class CurriedAuthResourceApiBuilder extends BaseApiBuilder<
 class ResourceApiBuilder extends HttpVerbsApiBuilder<ResourceApiBuilder> {
   curryAuth = () => new CurriedAuthResourceApiBuilder(this.options)
 
-  list = (query?: ParsedQuery) => httpGET(this.options, this.options.url, query)
+  list = (query?: ParsedQuery) => httpGET(this.options, '', query)
 
   detail = (pk: string | number, query?: ParsedQuery) =>
     httpGET(this.options, `/${pk}`, query)
 
-  create = (body?: any) => httpPOST(this.options, this.options.url, body)
+  create = (body?: any) => httpPOST(this.options, '', body)
 
   update = (pk: string | number, body?: any) =>
-    httpPUT(this.options, this.options.url + `/${pk}`, body)
+    httpPUT(this.options, `/${pk}`, body)
 
   remove = (pk: string | number, query?: ParsedQuery) =>
-    httpDELETE(this.options, this.options.url + `/${pk}`, query)
+    httpDELETE(this.options, `/${pk}`, query)
 
   removeId = (id: string | number, query?: ParsedQuery) =>
     httpDELETE(
       { ...this.options, mapResponse: () => ({ id }) },
-      this.options.url + `/${id}`,
+      `/${id}`,
       query
     )
 
