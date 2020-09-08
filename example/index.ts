@@ -9,7 +9,9 @@ const api = magikApi()
 
 // Make a simple GET
 api.get('/todos')
+// api.get({ gang: '23' })
 // ...At then You will get an Observable
+api.delete('/ficcc', { g: '2' })
 // .toPromise().then(console.log)
 
 // Add a query params GET /todos?done=yes
@@ -73,8 +75,22 @@ fetchTodos()
 
 // Curry a resource!
 const todosApi = api.resource('/todos')
-.list()
-.toPromise().then(console.log)
+// todosApi.delete('/fucker/23', { gang: '23' })
+// todosApi
+// .auth(23)
+// .post('/duck')
+// .headers({
+//   'X-GANG': 'xxxx'
+// })
+//   // .mapResponse()
+//   // .delete('/fucker/23', { gang: '23' })
+//   .removeId(33)
+  // .p
+// .list()
+// api.url('/ffffff').curryAuth().get('xxxx')({ aaa: 'xx' })
+// .
+// curryAuht().create
+// .toPromise().then(console.log)
 // todosApi.headers({}).
 // todosApi.list()
 // todosApi.detail(23)
@@ -105,7 +121,6 @@ const getMaTodo = api
     // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
   })
   .resource('/todos')
-  .makeDetailPUT('/kill')(23)
 // .update(23, { title: 'xx' })
 // .auth(23)
 // .detail(13)
