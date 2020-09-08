@@ -27,15 +27,18 @@ function injectAuthHeaders(
   const authHeaders =
     options.injectAuthHeaders && flyAuth
       ? options.injectAuthHeaders(flyAuth, fullRequestConfig)
-      : undefined
+      : null
 
-  return {
-    ...fullRequestConfig,
-    headers: {
-      ...fullRequestConfig.headers,
-      ...authHeaders,
-    },
+  if (authHeaders) {
+    return {
+      ...fullRequestConfig,
+      headers: {
+        ...fullRequestConfig.headers,
+        ...authHeaders,
+      },
+    }
   }
+  return fullRequestConfig
 }
 
 function makeUrl(url: string, options: ApiOptions, queryParams?: ParsedQuery) {
@@ -53,14 +56,11 @@ function makeUrl(url: string, options: ApiOptions, queryParams?: ParsedQuery) {
 }
 
 function guessContentType(body?: any): Object {
-  if (!body) {
-    return {}
-  }
   const fd = typeof window === 'object' ? window.FormData : null
   if (fd && body instanceof fd) {
-    return {}
+    return null
   }
-  return { 'Content-Type': 'application/json' }
+  return 'application/json'
 }
 
 interface SendHttpOptions {
@@ -81,19 +81,24 @@ function sendHttp({
   auth,
 }: SendHttpOptions) {
   const fullUrl = makeUrl(url, options, queryParams)
-  return ajax(
-    injectAuthHeaders(
-      {
-        ...guessContentType(body),
-        ...options.requestConfig,
-        url: fullUrl,
-        method,
-        body,
-      },
-      options,
-      auth
-    )
-  ).pipe(map(options.mapResponse ?? ((r) => r.response)))
+  const flyRequestConfig: AjaxRequest = {
+    ...options.requestConfig,
+    url: fullUrl,
+    method,
+  }
+  if (body) {
+    flyRequestConfig.body = body
+    const guessedContentTyped = guessContentType(body)
+    if (guessedContentTyped) {
+      flyRequestConfig.headers = {
+        'Content-Type': guessedContentTyped,
+        ...flyRequestConfig.headers,
+      }
+    }
+  }
+  return ajax(injectAuthHeaders(flyRequestConfig, options, auth)).pipe(
+    map(options.mapResponse ?? ((r) => r.response))
+  )
 }
 
 function httpGET(
@@ -134,7 +139,7 @@ function httpPUT(options: ApiOptions, url: string, body: any, auth?: any) {
 function httpPATCH(options: ApiOptions, url: string, body: any, auth?: any) {
   return sendHttp({
     url,
-    method: 'PATH',
+    method: 'PATCH',
     options,
     body,
     auth,
