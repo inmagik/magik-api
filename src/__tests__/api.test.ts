@@ -187,7 +187,7 @@ describe('Magik API', () => {
     })
   })
 
-  it('should handle resources', () => {
+  it('should handle resources', async () => {
     const api = magikApi().baseUrl('/v1')
 
     const gangApi = api.resource('/gangs')
@@ -233,11 +233,83 @@ describe('Magik API', () => {
       },
     })
 
-    gangApi.remove(23)
+    expect(gangApi.remove(23).toPromise()).resolves.toEqual({
+      name: 'GioVa',
+    })
     expect(mockAjax).toHaveBeenLastCalledWith({
       url: '/v1/gangs/23',
       method: 'DELETE',
     })
+
+    await expect(gangApi.removeId(99).toPromise()).resolves.toEqual({
+      id: 99,
+    })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/99',
+      method: 'DELETE',
+    })
+
+    gangApi.put('/foo/23', { name: 'Raverz' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/foo/23',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'Raverz',
+      },
+    })
+
+    gangApi.post('/foox/23', { name: 'Raverzx' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/foox/23',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'Raverzx',
+      },
+    })
+
+    gangApi.get('/fuzzy', { name: 'O.o' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/fuzzy?name=O.o',
+      method: 'GET',
+    })
+
+    gangApi
+      .headers({
+        'X-Giova': 23,
+      })
+      .patch('/foox/23', { name: 'Raverzxx' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/foox/23',
+      method: 'PATCH',
+      headers: {
+        'X-Giova': 23,
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'Raverzxx',
+      },
+    })
+
+    gangApi.delete('/killa')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/killa',
+      method: 'DELETE',
+    })
+  })
+
+  it('should give a way to map out response', async () => {
+    await expect(
+      magikApi()
+        .mapResponse((r) => r.status)
+        .get('/')
+        .toPromise()
+    ).resolves.toEqual(200)
   })
 
   it('should handle auth', () => {
