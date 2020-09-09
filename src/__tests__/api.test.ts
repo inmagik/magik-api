@@ -413,6 +413,18 @@ describe('Magik API', () => {
       url: '/kill',
       method: 'DELETE',
     })
+
+    api.url('/ppp').patch({ hello: 'Giova' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/ppp',
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        hello: 'Giova',
+      },
+    })
   })
 
   it('should handle url curry auth', () => {
@@ -442,8 +454,8 @@ describe('Magik API', () => {
         Authorization: 'Token X',
       },
       body: {
-        name: 'Giova'
-      }
+        name: 'Giova',
+      },
     })
 
     const deleteGang = gangsAuth.delete
@@ -457,7 +469,7 @@ describe('Magik API', () => {
     })
 
     const partialUpdateGang = gangsAuth.headers({
-      'X-Name': 'Rinne'
+      'X-Name': 'Rinne',
     }).patch
     partialUpdateGang('O.o')({ ids: 'ABC' })
     expect(mockAjax).toHaveBeenLastCalledWith({
@@ -485,6 +497,5 @@ describe('Magik API', () => {
         Authorization: 'Secret',
       },
     })
-
   })
 })

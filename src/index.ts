@@ -279,7 +279,7 @@ class UrlApiBuilder extends BaseApiBuilder<UrlApiBuilder> {
 
   put = (body?: any) => httpPUT(this.options, '', body)
 
-  path = (body?: any) => httpPATCH(this.options, '', body)
+  patch = (body?: any) => httpPATCH(this.options, '', body)
 
   delete = (query?: ParsedQuery) => httpDELETE(this.options, '', query)
 
