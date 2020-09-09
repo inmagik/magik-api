@@ -486,7 +486,7 @@ describe('Magik API', () => {
     })
   })
 
-  it('should handle resource curry auth', () => {
+  it('should handle resource curry auth', async () => {
     const fooDetail = magikApi().resource('/foo').curryAuth().detail
 
     fooDetail('Secret')(23)
@@ -528,6 +528,22 @@ describe('Magik API', () => {
       url: '/foo/99',
       method: 'DELETE',
       headers: {
+        Authorization: 'Secret',
+      },
+    })
+
+    const removeFooId = magikApi().resource('/foo').curryAuth().headers({
+      'X-Drago': 23,
+    }).removeId
+
+    await expect(removeFooId('Secret')(99).toPromise()).resolves.toEqual({
+      id: 99,
+    })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo/99',
+      method: 'DELETE',
+      headers: {
+        'X-Drago': 23,
         Authorization: 'Secret',
       },
     })
