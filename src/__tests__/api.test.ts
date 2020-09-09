@@ -274,6 +274,18 @@ describe('Magik API', () => {
       },
     })
 
+    gangApi.partialUpdate(232, { name: 'RaverzX' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/v1/gangs/232',
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'RaverzX',
+      },
+    })
+
     expect(gangApi.remove(23).toPromise()).resolves.toEqual({
       name: 'GioVa',
     })
@@ -513,6 +525,21 @@ describe('Magik API', () => {
     expect(mockAjax).toHaveBeenLastCalledWith({
       url: '/foo/99',
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Secret',
+      },
+      body: {
+        go: 'Home',
+      },
+    })
+
+    const partialUpdateFoo = magikApi().resource('/foo').curryAuth()
+      .partialUpdate
+      partialUpdateFoo('Secret')(99, { go: 'Home' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo/99',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Secret',

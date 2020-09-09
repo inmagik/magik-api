@@ -306,6 +306,9 @@ class CurriedAuthResourceApiBuilder extends BaseApiBuilder<
   update = (auth: any) => (pk: string | number, body?: any) =>
     httpPUT(this.options, `/${pk}`, body, auth)
 
+  partialUpdate = (auth: any) => (pk: string | number, body?: any) =>
+    httpPATCH(this.options, `/${pk}`, body, auth)
+
   remove = (auth: any) => (pk: string | number, query?: ParsedQuery) =>
     httpDELETE(this.options, `/${pk}`, query, auth)
 
@@ -333,6 +336,9 @@ class ResourceApiBuilder extends HttpVerbsApiBuilder<ResourceApiBuilder> {
 
   update = (pk: string | number, body?: any) =>
     httpPUT(this.options, `/${pk}`, body)
+
+  partialUpdate = (pk: string | number, body?: any) =>
+    httpPATCH(this.options, `/${pk}`, body)
 
   remove = (pk: string | number, query?: ParsedQuery) =>
     httpDELETE(this.options, `/${pk}`, query)
