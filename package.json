@@ -1,6 +1,6 @@
 {
   "name": "magik-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "https://github.com/inmagik/magik-api",
   "description": "Fluent API client based on rxjs",
   "author": "Giovanni Fumagalli <giovanni.fumagalli@inmagik.com>",
