@@ -1,11 +1,20 @@
 {
   "name": "magik-api",
   "version": "0.1.0",
+  "repository": "https://github.com/inmagik/magik-api",
   "description": "Fluent API client based on rxjs",
   "author": "Giovanni Fumagalli <giovanni.fumagalli@inmagik.com>",
   "license": "MIT",
-  "main": "lib/index.js",
-  "module": "lib/index.cjs.js",
+  "bugs": {
+    "url": "https://github.com/inmagik/magik-api/issues"
+  },
+  "keywords": [
+    "api",
+    "rxjs",
+    "rest"
+  ],
+  "main": "./lib/index.cjs.js",
+  "module": "./lib/index.es.js",
   "types": "./lib/index.d.ts",
   "files": [
     "README.MD",
