@@ -103,7 +103,7 @@ todosApi.partialUpdate(2, { mode: 'dirty' })
 todosApi.delete(2, { mode: 'dirty' })
 // DELETE /todos/2
 
-// ehehe shorcut
+// ehehe this is a shorcut
 todosApi.deleteId(2)
 // DELETE /todos/2
 // map response to ({ id: 2 }) util for 204 No Content styles responses
