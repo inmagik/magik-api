@@ -497,5 +497,48 @@ describe('Magik API', () => {
         Authorization: 'Secret',
       },
     })
+
+    const fooList = magikApi().resource('/foo').curryAuth().list
+    fooList('Secret')()
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo',
+      method: 'GET',
+      headers: {
+        Authorization: 'Secret',
+      },
+    })
+
+    const updateFoo = magikApi().resource('/foo').curryAuth().update
+    updateFoo('Secret')(99, { go: 'Home' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo/99',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Secret',
+      },
+      body: {
+        go: 'Home',
+      },
+    })
+
+    const removeFoo = magikApi().resource('/foo').curryAuth().remove
+    removeFoo('Secret')(99)
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo/99',
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Secret',
+      },
+    })
+  })
+
+  it('should able to create resources from curried url', () => {
+    const maTickets = magikApi().url('/posts/23').resource('/tickets')
+    maTickets.detail(88)
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/posts/23/tickets/88',
+      method: 'GET',
+    })
   })
 })
