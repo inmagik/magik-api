@@ -159,6 +159,47 @@ describe('Magik API', () => {
     })
   })
 
+  it('should handle query params', () => {
+    magikApi()
+      .query({
+        name: 'GioVa',
+        age: '23',
+      })
+      .get('/foo', { age: '27' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo?age=27&name=GioVa',
+      method: 'GET',
+    })
+
+    magikApi()
+      .query({
+        name: 'GioVa',
+        age: '23',
+      })
+      .get('/foo?name=Ringo&age=99&gang=KDS', { age: '27' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo?age=27&gang=KDS&name=Ringo',
+      method: 'GET',
+    })
+
+    magikApi()
+      .query({
+        name: 'GioVa',
+        age: '23',
+      })
+      .put('/foo', { age: '27' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo?age=23&name=GioVa',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        age: '27',
+      },
+    })
+  })
+
   it('should be able to set a base url for requests', () => {
     const api = magikApi().baseUrl('/v1')
 

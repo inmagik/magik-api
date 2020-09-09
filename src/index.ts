@@ -52,7 +52,7 @@ function makeUrl(url: string, options: ApiOptions, queryParams?: ParsedQuery) {
 
   let { url: cleanUrl, query } = parseUrl(fullUrl)
   if (options.queryParams) {
-    query = { ...query, ...options.queryParams }
+    query = { ...options.queryParams, ...query }
   }
   if (queryParams) {
     query = { ...query, ...queryParams }
