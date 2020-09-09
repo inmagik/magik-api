@@ -249,7 +249,7 @@ class ApiCurriedAuthUrlBuilder extends BaseApiBuilder<
 
   put = (auth: any) => (body: any) => httpPUT(this.options, '', body, auth)
 
-  path = (auth: any) => (body: any) => httpPATCH(this.options, '', body, auth)
+  patch = (auth: any) => (body: any) => httpPATCH(this.options, '', body, auth)
 
   delete = (auth: any) => (query?: ParsedQuery) =>
     httpDELETE(this.options, '', query, auth)

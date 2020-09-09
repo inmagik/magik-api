@@ -414,4 +414,77 @@ describe('Magik API', () => {
       method: 'DELETE',
     })
   })
+
+  it('should handle url curry auth', () => {
+    const getFoo = magikApi().url('/foo').curryAuth().get
+    getFoo('Secret')({ hello: 'Giova' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo?hello=Giova',
+      method: 'GET',
+      headers: {
+        Authorization: 'Secret',
+      },
+    })
+
+    const authApi = magikApi().authHeaders((t) => ({
+      Authorization: `Token ${t}`,
+    }))
+
+    const gangsAuth = authApi.url('/gangs').curryAuth()
+    const postGang = gangsAuth.post
+
+    postGang('X')({ name: 'Giova' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/gangs',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Token X',
+      },
+      body: {
+        name: 'Giova'
+      }
+    })
+
+    const deleteGang = gangsAuth.delete
+    deleteGang('O.o')({ ids: 'ABC' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/gangs?ids=ABC',
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Token O.o',
+      },
+    })
+
+    const partialUpdateGang = gangsAuth.headers({
+      'X-Name': 'Rinne'
+    }).patch
+    partialUpdateGang('O.o')({ ids: 'ABC' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/gangs',
+      method: 'PATCH',
+      body: {
+        ids: 'ABC',
+      },
+      headers: {
+        'X-Name': 'Rinne',
+        'Content-Type': 'application/json',
+        Authorization: 'Token O.o',
+      },
+    })
+  })
+
+  it('should handle resource curry auth', () => {
+    const fooDetail = magikApi().resource('/foo').curryAuth().detail
+
+    fooDetail('Secret')(23)
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo/23',
+      method: 'GET',
+      headers: {
+        Authorization: 'Secret',
+      },
+    })
+
+  })
 })
