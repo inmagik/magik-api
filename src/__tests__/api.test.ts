@@ -101,6 +101,64 @@ describe('Magik API', () => {
     })
   })
 
+  it('should handle headers', () => {
+    const api = magikApi()
+    api
+      .headers({
+        'X-Giova': 23,
+      })
+      .headers({
+        'Content-Type': 'Fuck',
+      })
+      .headers({
+        'X-Giova': 99,
+      })
+      .put('/', {
+        name: 'Rinne',
+      })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/',
+      headers: {
+        'X-Giova': 99,
+        'Content-Type': 'Fuck',
+      },
+      body: {
+        name: 'Rinne',
+      },
+      method: 'PUT',
+    })
+  })
+
+  it('should handle low level request configuration', () => {
+    const api = magikApi()
+    api
+      .request({
+        timeout: 23,
+      })
+      .request({
+        responseType: 'text',
+      })
+      .headers({
+        'X-Giova': 23,
+        'X-Gang': 'KDS',
+      })
+      .request({
+        headers: {
+          'X-Giova': 23,
+        },
+      })
+      .get('/')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/',
+      method: 'GET',
+      headers: {
+        'X-Giova': 23,
+      },
+      timeout: 23,
+      responseType: 'text',
+    })
+  })
+
   it('should be able to set a base url for requests', () => {
     const api = magikApi().baseUrl('/v1')
 
@@ -185,15 +243,18 @@ describe('Magik API', () => {
   it('should handle auth', () => {
     const api = magikApi()
 
-    api.auth('Jonny').authHeaders(t => ({
-      'Authorization': `Tokenz ${t}`
-    })).get('/zecrets')
+    api
+      .auth('Jonny')
+      .authHeaders((t) => ({
+        Authorization: `Tokenz ${t}`,
+      }))
+      .get('/zecrets')
     expect(mockAjax).toHaveBeenLastCalledWith({
       url: '/zecrets',
       method: 'GET',
       headers: {
-        Authorization: 'Tokenz Jonny'
-      }
+        Authorization: 'Tokenz Jonny',
+      },
     })
 
     api.auth('Jonny').get('/ola')
@@ -201,8 +262,43 @@ describe('Magik API', () => {
       url: '/ola',
       method: 'GET',
       headers: {
-        Authorization: 'Jonny'
-      }
+        Authorization: 'Jonny',
+      },
+    })
+  })
+
+  it('should handle curry url', () => {
+    const api = magikApi()
+
+    const getFoo = api.url('/foo').get
+    getFoo({ hello: 'Giova' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/foo?hello=Giova',
+      method: 'GET',
+    })
+
+    api.url('/bella').url('/giova').post()
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/bella/giova',
+      method: 'POST',
+    })
+
+    api.url('/bella').url('/giova').url('/wooo').put({ gang: 23 })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/bella/giova/wooo',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        gang: 23,
+      },
+    })
+
+    api.url('/kill').delete()
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/kill',
+      method: 'DELETE',
     })
   })
 })
