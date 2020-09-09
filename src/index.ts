@@ -14,6 +14,7 @@ type ResponseMapper = (response: AjaxResponse) => any
 interface ApiOptions {
   url: string
   baseUrl?: string
+  trailingSlash: boolean
   auth?: any
   injectAuthHeaders?: AuthHeadersInjector
   requestConfig?: ApiUrlRequest
@@ -56,6 +57,14 @@ function makeUrl(url: string, options: ApiOptions, queryParams?: ParsedQuery) {
   }
   if (queryParams) {
     query = { ...query, ...queryParams }
+  }
+
+  if (
+    options.trailingSlash &&
+    cleanUrl.length > 0 &&
+    cleanUrl[cleanUrl.length - 1] !== '/'
+  ) {
+    cleanUrl += '/'
   }
 
   return stringifyUrl({ url: cleanUrl, query })
@@ -194,6 +203,9 @@ abstract class BaseApiBuilder<T> {
 
   mapResponse = (mapResponse: ResponseMapper) =>
     this.clone({ ...this.options, mapResponse })
+
+  trailingSlash = (trailingSlash: boolean) =>
+    this.clone({ ...this.options, trailingSlash })
 
   request = (requestConfig: ApiUrlRequest) =>
     this.clone({
@@ -364,5 +376,6 @@ class ApiBuilder extends HttpVerbsApiBuilder<ApiBuilder> {
 export default function magikApi() {
   return new ApiBuilder({
     url: '',
+    trailingSlash: false,
   })
 }

@@ -584,4 +584,36 @@ describe('Magik API', () => {
       method: 'GET',
     })
   })
+
+  it('should support trailing slash', () => {
+    const api = magikApi().trailingSlash(true)
+    api.get('/woo/')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/woo/',
+      method: 'GET',
+    })
+    api.get('/woo')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/woo/',
+      method: 'GET',
+    })
+    api.get('/woo?name=Giova')
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/woo/?name=Giova',
+      method: 'GET',
+    })
+
+    api.resource('/tasks').update(23, { name: 'Giova' })
+    expect(mockAjax).toHaveBeenLastCalledWith({
+      url: '/tasks/23/',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        name: 'Giova',
+      },
+    })
+
+  })
 })
