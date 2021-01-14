@@ -3,7 +3,16 @@
 import { Observable } from 'rxjs'
 import { ajax, AjaxRequest, AjaxResponse } from 'rxjs/ajax'
 import { map } from 'rxjs/operators'
-import { parseUrl, stringifyUrl, ParsedQuery, stringify } from 'query-string'
+import { parseUrl, stringifyUrl, ParsedQuery } from 'query-string'
+import xhr2 from 'xhr2'
+
+// NOTE: rxjs 6.x do more stuff to support IE < 10
+// this line drop support for IE < 10 but add support for nodejs
+// library like Axios ecc doesn't support IE < 10 end at then end when
+// finally rxjs 7 arrive drop support to IE < 10
+// so use XMLHttpRequest without paranoia and fuck IE < 10
+// https://github.com/ReactiveX/rxjs/commit/0eaadd60c716050f5e3701d513a028a9cd49085a
+const XHR2 = typeof XMLHttpRequest !== 'undefined' ? XMLHttpRequest : xhr2
 
 type ApiUrlRequest = Omit<AjaxRequest, 'url' | 'method' | 'body'>
 
@@ -98,6 +107,7 @@ function sendHttp({
   const fullUrl = makeUrl(url, options, queryParams)
   const flyRequestConfig: AjaxRequest = {
     ...options.requestConfig,
+    createXHR: () => new XHR2(),
     url: fullUrl,
     method,
   }
@@ -330,9 +340,7 @@ abstract class HttpVerbsApiBuilder<T> extends BaseApiBuilder<T> {
     httpDELETE(this.options, url, query)
 }
 
-class ApiCurriedAuthUrlBuilder extends BaseApiBuilder<
-  ApiCurriedAuthUrlBuilder
-> {
+class ApiCurriedAuthUrlBuilder extends BaseApiBuilder<ApiCurriedAuthUrlBuilder> {
   get = (auth: any) => (query?: ParsedQuery) =>
     httpGET(this.options, '', query, auth)
 
@@ -413,9 +421,7 @@ class UrlApiBuilder extends BaseApiBuilder<UrlApiBuilder> {
   protected clone = (options: ApiOptions) => new UrlApiBuilder(options)
 }
 
-class CurriedAuthResourceApiBuilder extends BaseApiBuilder<
-  CurriedAuthResourceApiBuilder
-> {
+class CurriedAuthResourceApiBuilder extends BaseApiBuilder<CurriedAuthResourceApiBuilder> {
   protected options: ApiOptions
 
   constructor(options: ApiOptions) {

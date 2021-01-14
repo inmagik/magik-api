@@ -17,8 +17,6 @@
   "module": "./lib/index.es.js",
   "types": "./lib/index.d.ts",
   "files": [
-    "README.MD",
-    "LICENSE",
     "lib"
   ],
   "scripts": {
@@ -46,6 +44,7 @@
   "dependencies": {
     "query-string": "^6.13.1",
     "rxjs": "^6.6.3",
-    "tslib": "^2.0.1"
+    "tslib": "^2.0.1",
+    "xhr2": "^0.2.0"
   }
 }

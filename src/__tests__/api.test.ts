@@ -1,4 +1,5 @@
-const mockAjax = jest.fn((...args: any) =>
+import { of } from 'rxjs'
+const mockAjax = jest.fn((config: any) =>
   of({
     response: { name: 'GioVa' },
     status: 200,
@@ -6,12 +7,16 @@ const mockAjax = jest.fn((...args: any) =>
 )
 jest.mock('rxjs/ajax', () => ({
   __esModule: true,
-  ajax: (...args: any) => mockAjax(...args),
+  ajax: (config: any) => mockAjax({
+    ...config,
+    // NOTE: This line avoid the pain to insert
+    // createXHR: ...
+    // in every fucking expect
+    createXHR: undefined,
+  }),
 }))
 jest.mock('rxjs/ajax')
 import { ParsedQuery } from 'query-string'
-import { of } from 'rxjs'
-import { ajax } from 'rxjs/ajax'
 
 import magikApi from '../index'
 
