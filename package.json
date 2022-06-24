@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "query-string": "^6.13.1",
-    "rxjs": "^6.6.3",
+    "rxjs": "^7.5.5",
     "tslib": "^2.0.1",
     "xhr2": "^0.2.0"
   }
