@@ -1,4 +1,4 @@
-import { of } from 'rxjs'
+import { lastValueFrom, of } from 'rxjs';
 const mockAjax = jest.fn((config: any) =>
   of({
     response: { name: 'GioVa' },
@@ -291,7 +291,7 @@ describe('Magik API', () => {
       },
     })
 
-    expect(gangApi.remove(23).toPromise()).resolves.toEqual({
+    expect(lastValueFrom(gangApi.remove(23))).resolves.toEqual({
       name: 'GioVa',
     })
     expect(mockAjax).toHaveBeenLastCalledWith({
@@ -299,7 +299,7 @@ describe('Magik API', () => {
       method: 'DELETE',
     })
 
-    await expect(gangApi.removeId(99).toPromise()).resolves.toEqual({
+    await expect(lastValueFrom(gangApi.removeId(99))).resolves.toEqual({
       id: 99,
     })
     expect(mockAjax).toHaveBeenLastCalledWith({
@@ -363,10 +363,9 @@ describe('Magik API', () => {
 
   it('should give a way to map out response', async () => {
     await expect(
-      magikApi()
+      lastValueFrom(magikApi()
         .mapResponse((r) => r.status)
-        .get('/')
-        .toPromise()
+        .get('/'))
     ).resolves.toEqual(200)
   })
 
@@ -568,7 +567,7 @@ describe('Magik API', () => {
       'X-Drago': 23,
     }).removeId
 
-    await expect(removeFooId('Secret')(99).toPromise()).resolves.toEqual({
+    await expect(lastValueFrom(removeFooId('Secret')(99))).resolves.toEqual({
       id: 99,
     })
     expect(mockAjax).toHaveBeenLastCalledWith({
